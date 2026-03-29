@@ -13,24 +13,24 @@ interface TimelineViewProps {
 // Urgency colors for task blocks
 const URGENCY_STYLES = {
   low: {
-    gradient: 'from-emerald-500/80 to-emerald-600/60',
-    border: 'border-emerald-400/40',
-    shadow: 'shadow-emerald-500/30 hover:shadow-emerald-500/50'
+    gradient: 'from-emerald-500/90 to-emerald-600/70',
+    border: 'border-emerald-400/50',
+    shadow: 'shadow-emerald-500/40 hover:shadow-emerald-500/60'
   },
   medium: {
-    gradient: 'from-sky-500/80 to-sky-600/60',
-    border: 'border-sky-400/40',
-    shadow: 'shadow-sky-500/30 hover:shadow-sky-500/50'
+    gradient: 'from-sky-500/90 to-sky-600/70',
+    border: 'border-sky-400/50',
+    shadow: 'shadow-sky-500/40 hover:shadow-sky-500/60'
   },
   high: {
-    gradient: 'from-amber-500/80 to-amber-600/60',
-    border: 'border-amber-400/40',
-    shadow: 'shadow-amber-500/30 hover:shadow-amber-500/50'
+    gradient: 'from-amber-500/90 to-amber-600/70',
+    border: 'border-amber-400/50',
+    shadow: 'shadow-amber-500/40 hover:shadow-amber-500/60'
   },
   urgent: {
-    gradient: 'from-rose-500/80 to-rose-600/60',
-    border: 'border-rose-400/40',
-    shadow: 'shadow-rose-500/30 hover:shadow-rose-500/50'
+    gradient: 'from-rose-500/90 to-rose-600/70',
+    border: 'border-rose-400/50',
+    shadow: 'shadow-rose-500/40 hover:shadow-rose-500/60'
   },
 }
 
@@ -132,12 +132,10 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
       })
     })
 
-    // Now we need to calculate widths based on max columns at any point
-    // Find groups of overlapping tasks and calculate their max columns
+    // Calculate widths based on max columns at any point
     const maxColumns = columns.length
 
     // Calculate actual width for each task based on overlapping groups
-    // Group tasks that overlap with each other
     const groups: TaskLayout[][] = []
     const usedTasks = new Set<string>()
 
@@ -272,14 +270,14 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
   return (
     <div className="relative">
       {/* Help text */}
-      <div className="text-xs text-slate-500 mb-3 text-center">
+      <div className="text-xs text-[oklch(0.4_0_0)] mb-4 text-center bg-white/5 rounded-xl py-2">
         Drag tasks to move • Drag edges to resize
       </div>
 
       {/* Timeline container */}
-      <div className="flex rounded-xl overflow-hidden border border-slate-700/60 bg-slate-900/50">
+      <div className="flex rounded-2xl overflow-hidden border border-white/5 bg-[oklch(0.12_0.015_265)]/50">
         {/* Time labels column */}
-        <div className="w-14 flex-shrink-0 border-r border-slate-700/60 bg-slate-800/30">
+        <div className="w-14 flex-shrink-0 border-r border-white/5 bg-white/5">
           {hours.slice(0, -1).map((hour) => (
             <div
               key={hour}
@@ -288,7 +286,7 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
             >
               <span className={cn(
                 "text-[11px] font-medium tabular-nums",
-                isCurrentHour(hour) ? "text-violet-400" : "text-slate-500"
+                isCurrentHour(hour) ? "text-[oklch(0.72_0.2_280)]" : "text-[oklch(0.4_0_0)]"
               )}>
                 {formatHour(hour)}
               </span>
@@ -307,8 +305,8 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
             <div
               key={hour}
               className={cn(
-                "border-t border-slate-700/50",
-                isCurrentHour(hour) && "bg-violet-500/5"
+                "border-t border-white/5",
+                isCurrentHour(hour) && "bg-[oklch(0.72_0.2_280_/_0.05)]"
               )}
               style={{ height: HOUR_HEIGHT }}
             />
@@ -338,7 +336,7 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
               <div
                 key={task.id}
                 className={cn(
-                  "absolute rounded-lg overflow-hidden",
+                  "absolute rounded-xl overflow-hidden",
                   "bg-gradient-to-br border shadow-lg transition-all duration-150",
                   style.gradient,
                   style.border,
@@ -356,7 +354,7 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
               >
                 {/* Top resize handle */}
                 <div
-                  className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-white/20 transition-colors rounded-t-lg"
+                  className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-white/20 transition-colors rounded-t-xl"
                   onMouseDown={(e) => startDrag(e, task, 'resize-top')}
                 />
 
@@ -391,7 +389,7 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
 
                 {/* Bottom resize handle */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-white/20 transition-colors rounded-b-lg"
+                  className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize z-20 hover:bg-white/20 transition-colors rounded-b-xl"
                   onMouseDown={(e) => startDrag(e, task, 'resize-bottom')}
                 />
               </div>
@@ -403,7 +401,7 @@ export function TimelineView({ selectedDate, onEditTask }: TimelineViewProps) {
       {/* Empty state */}
       {tasks.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="text-center text-slate-500 bg-slate-900/90 px-6 py-4 rounded-xl backdrop-blur-sm border border-slate-700/50">
+          <div className="text-center text-[oklch(0.4_0_0)] bg-[oklch(0.16_0.018_265)]/90 px-6 py-4 rounded-2xl backdrop-blur-sm border border-white/5">
             <p className="font-medium">No tasks scheduled</p>
             <p className="text-sm mt-1">Add a task to see it on the timeline</p>
           </div>

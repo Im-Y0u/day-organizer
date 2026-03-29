@@ -58,20 +58,30 @@ export function SortableTaskCard({ task, onEdit, isDailyTemplate = false }: Sort
       ref={setNodeRef}
       style={style}
       className={cn(
-        "overflow-hidden transition-all duration-200 hover:shadow-lg border-l-4",
-        urgencyStyle.border,
-        task.completed && "opacity-60",
+        "group overflow-hidden transition-all duration-300 hover:shadow-xl border-0",
+        "bg-gradient-to-r from-[oklch(0.2_0.018_265)] to-[oklch(0.18_0.015_265)]",
+        "hover:from-[oklch(0.22_0.02_265)] hover:to-[oklch(0.2_0.018_265)]",
+        task.completed && "opacity-60 hover:opacity-80",
         isPast && !task.completed && "opacity-50",
-        isDragging && "shadow-xl scale-[1.02] z-50 ring-2 ring-violet-400/50"
+        isDragging && "shadow-2xl scale-[1.02] z-50 ring-2 ring-[oklch(0.72_0.2_280_/_0.5)]"
       )}
     >
-      <div className={cn("p-4 flex items-center gap-3", urgencyStyle.bg)}>
+      {/* Urgency indicator bar */}
+      <div className={cn(
+        "h-1 w-full",
+        task.urgency === 'urgent' && "bg-gradient-to-r from-rose-500 to-pink-500",
+        task.urgency === 'high' && "bg-gradient-to-r from-amber-500 to-orange-500",
+        task.urgency === 'medium' && "bg-gradient-to-r from-sky-500 to-cyan-500",
+        task.urgency === 'low' && "bg-gradient-to-r from-emerald-500 to-teal-500"
+      )} />
+      
+      <div className="p-4 flex items-center gap-3">
         {/* Drag Handle */}
         {!isDailyTemplate && (
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-slate-300 touch-none"
+            className="cursor-grab active:cursor-grabbing text-[oklch(0.35_0_0)] hover:text-[oklch(0.6_0_0)] touch-none opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <GripVertical className="w-4 h-4" />
           </div>
@@ -84,7 +94,14 @@ export function SortableTaskCard({ task, onEdit, isDailyTemplate = false }: Sort
               toggleComplete(task.id)
             }
           }}
-          className={cn("data-[state=checked]:bg-white/20 data-[state=checked]:border-white/40", task.urgency === 'urgent' && "border-rose-400")}
+          className={cn(
+            "w-5 h-5 rounded-md border-2 transition-all",
+            task.urgency === 'urgent' && "border-rose-500 data-[state=checked]:bg-rose-500",
+            task.urgency === 'high' && "border-amber-500 data-[state=checked]:bg-amber-500",
+            task.urgency === 'medium' && "border-sky-500 data-[state=checked]:bg-sky-500",
+            task.urgency === 'low' && "border-emerald-500 data-[state=checked]:bg-emerald-500",
+            task.completed && "bg-white/10 border-white/30"
+          )}
           disabled={isDailyTemplate}
         />
 
@@ -92,47 +109,49 @@ export function SortableTaskCard({ task, onEdit, isDailyTemplate = false }: Sort
           <div className="flex items-center gap-2 flex-wrap">
             <h3
               className={cn(
-                "font-medium text-sm",
-                task.completed && "line-through text-slate-400"
+                "font-semibold text-[15px] text-white",
+                task.completed && "line-through text-[oklch(0.5_0_0)]"
               )}
             >
               {task.title}
             </h3>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {task.isQuick && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-violet-500/20 text-violet-300 border-violet-400/30">
+                <Badge variant="outline" className="text-[10px] px-2 py-0 h-5 bg-[oklch(0.72_0.2_280_/_0.15)] text-[oklch(0.72_0.2_280)] border-[oklch(0.72_0.2_280_/_0.3)] rounded-full">
                   <Zap className="w-3 h-3 mr-0.5" />
                   Quick
                 </Badge>
               )}
 
-              <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-5", urgencyStyle.badge)}>
+              <Badge variant="outline" className={cn("text-[10px] px-2 py-0 h-5 rounded-full", urgencyStyle.badge)}>
                 {URGENCY_LABELS[task.urgency || 'medium']}
               </Badge>
 
               {isDailyTemplate && (
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-violet-500/20 text-violet-300 border-violet-400/30">
+                <Badge variant="outline" className="text-[10px] px-2 py-0 h-5 bg-[oklch(0.72_0.2_280_/_0.15)] text-[oklch(0.72_0.2_280)] border-[oklch(0.72_0.2_280_/_0.3)] rounded-full">
                   Daily
                 </Badge>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-400">
-            <Clock className="w-3 h-3" />
-            <span className="font-medium tabular-nums">
-              {formatTime(task.startTime)} - {formatTime(task.endTime)}
-            </span>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 text-xs text-[oklch(0.6_0_0)]">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="font-medium tabular-nums">
+                {formatTime(task.startTime)} - {formatTime(task.endTime)}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           {onEdit && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-slate-400 hover:text-white hover:bg-white/10"
+              className="h-9 w-9 text-[oklch(0.5_0_0)] hover:text-white hover:bg-white/10 rounded-lg"
               onClick={() => onEdit(task)}
             >
               <Edit2 className="w-4 h-4" />
@@ -141,7 +160,7 @@ export function SortableTaskCard({ task, onEdit, isDailyTemplate = false }: Sort
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+            className="h-9 w-9 text-[oklch(0.5_0_0)] hover:text-rose-400 hover:bg-rose-500/10 rounded-lg"
             onClick={handleDelete}
           >
             <Trash2 className="w-4 h-4" />

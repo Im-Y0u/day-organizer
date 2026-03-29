@@ -14,13 +14,13 @@ import {
   addMonths, 
   subMonths,
   startOfWeek,
-  endOfWeek,
-  getDay
+  endOfWeek
 } from 'date-fns'
-import { ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTaskStore, getTodayDate } from '@/store/taskStore'
 import { AppLayout } from '@/components/AppLayout'
+import { DateNavigation } from '@/components/DateNavigation'
 import { SettingsDialog } from '@/components/tasks/SettingsDialog'
 import { cn } from '@/lib/utils'
 
@@ -32,11 +32,12 @@ const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function CalendarPage() {
   const router = useRouter()
+  const [selectedDate, setSelectedDate] = useState(getTodayDate())
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const hydrated = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot)
-  const { tasks, getTasksForDateWithDaily } = useTaskStore()
+  const { getTasksForDateWithDaily } = useTaskStore()
 
   const today = getTodayDate()
 
@@ -46,19 +47,23 @@ export default function CalendarPage() {
 
   const goToToday = () => {
     setCurrentMonth(new Date())
+    setSelectedDate(getTodayDate())
   }
 
   const handleDateClick = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd')
+    setSelectedDate(dateStr)
     router.push(`/timeline?date=${dateStr}`)
   }
 
-  // Get all days to display in the calendar grid (including days from adjacent months)
-  const monthStart = startOfMonth(currentMonth)
-  const monthEnd = endOfMonth(currentMonth)
-  const startDate = startOfWeek(monthStart)
-  const endDate = endOfWeek(monthEnd)
-  const allDays = eachDayOfInterval({ start: startDate, end: endDate })
+  // Sync month view with selected date
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date)
+    const newDate = new Date(date + 'T00:00:00')
+    if (!isSameMonth(newDate, currentMonth)) {
+      setCurrentMonth(newDate)
+    }
+  }
 
   // Get task info for a specific date
   const getTaskInfo = (date: Date) => {
@@ -69,18 +74,28 @@ export default function CalendarPage() {
     return { completed, total, hasTasks: total > 0 }
   }
 
+  // Get all days to display in the calendar grid
+  const monthStart = startOfMonth(currentMonth)
+  const monthEnd = endOfMonth(currentMonth)
+  const startDate = startOfWeek(monthStart)
+  const endDate = endOfWeek(monthEnd)
+  const allDays = eachDayOfInterval({ start: startDate, end: endDate })
+
   if (!hydrated) return null
 
   return (
     <AppLayout onOpenSettings={() => setIsSettingsOpen(true)}>
+      {/* Date Navigation */}
+      <DateNavigation selectedDate={selectedDate} onDateChange={handleDateChange} />
+
       {/* Month Navigation */}
-      <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 mb-6">
+      <div className="bg-gradient-to-r from-[oklch(0.18_0.018_265)]/80 to-[oklch(0.16_0.015_265)]/80 backdrop-blur-sm rounded-2xl p-4 border border-white/5 mb-6 shadow-lg">
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigateMonth('prev')}
-            className="h-10 w-10 text-slate-400 hover:text-white hover:bg-white/10"
+            className="h-11 w-11 text-[oklch(0.5_0_0)] hover:text-white hover:bg-white/5 rounded-xl"
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
@@ -88,18 +103,18 @@ export default function CalendarPage() {
           <div className="text-center">
             <button 
               onClick={goToToday}
-              className="text-xl font-semibold text-white hover:text-violet-400 transition-colors"
+              className="text-2xl font-bold text-white hover:text-[oklch(0.72_0.2_280)] transition-colors"
             >
               {format(currentMonth, 'MMMM yyyy')}
             </button>
-            <p className="text-xs text-slate-500 mt-1">Click month to go to today</p>
+            <p className="text-xs text-[oklch(0.4_0_0)] mt-1">Click to go to today</p>
           </div>
 
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigateMonth('next')}
-            className="h-10 w-10 text-slate-400 hover:text-white hover:bg-white/10"
+            className="h-11 w-11 text-[oklch(0.5_0_0)] hover:text-white hover:bg-white/5 rounded-xl"
           >
             <ChevronRight className="h-5 w-5" />
           </Button>
@@ -107,13 +122,13 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700/50 overflow-hidden">
+      <div className="bg-gradient-to-br from-[oklch(0.18_0.018_265)]/60 to-[oklch(0.16_0.015_265)]/60 backdrop-blur-sm rounded-2xl border border-white/5 overflow-hidden shadow-lg">
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 bg-slate-800/50 border-b border-slate-700/50">
+        <div className="grid grid-cols-7 bg-white/5 border-b border-white/5">
           {WEEKDAYS.map((day) => (
             <div 
               key={day} 
-              className="py-3 text-center text-sm font-medium text-slate-400"
+              className="py-3.5 text-center text-sm font-medium text-[oklch(0.5_0_0)]"
             >
               {day}
             </div>
@@ -127,7 +142,7 @@ export default function CalendarPage() {
             const isCurrentMonth = isSameMonth(date, currentMonth)
             const isCurrentDay = isToday(date)
             const isPastDay = isPast(date) && !isCurrentDay
-            const isSelectedDay = format(date, 'yyyy-MM-dd') === today
+            const isSelectedDay = dateStr === selectedDate
             const taskInfo = getTaskInfo(date)
 
             return (
@@ -135,22 +150,25 @@ export default function CalendarPage() {
                 key={dateStr}
                 onClick={() => handleDateClick(date)}
                 className={cn(
-                  "relative aspect-square p-2 flex flex-col items-center justify-start border-b border-r border-slate-700/30 transition-all",
-                  "hover:bg-violet-500/10 hover:border-violet-500/30",
-                  !isCurrentMonth && "bg-slate-900/30",
+                  "relative aspect-square p-2 flex flex-col items-center justify-start border-b border-r border-white/5 transition-all",
+                  "hover:bg-[oklch(0.72_0.2_280_/_0.1)]",
+                  !isCurrentMonth && "bg-black/20",
                   isPastDay && "opacity-40",
-                  isCurrentDay && "bg-violet-500/5"
+                  isCurrentDay && "bg-[oklch(0.72_0.2_280_/_0.05)]",
+                  isSelectedDay && "bg-[oklch(0.72_0.2_280_/_0.15)]"
                 )}
               >
                 {/* Day Number */}
                 <span 
                   className={cn(
-                    "text-sm font-medium mb-1",
+                    "text-sm font-semibold mb-1 transition-all",
                     isCurrentDay 
-                      ? "text-violet-400 ring-2 ring-violet-500/50 rounded-full w-7 h-7 flex items-center justify-center" 
-                      : isCurrentMonth 
-                        ? "text-white" 
-                        : "text-slate-600"
+                      ? "w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-br from-[oklch(0.72_0.2_280)] to-[oklch(0.7_0.22_320)] text-white shadow-lg shadow-purple-500/20" 
+                      : isSelectedDay
+                        ? "w-8 h-8 rounded-xl flex items-center justify-center bg-white/10 text-white ring-2 ring-[oklch(0.72_0.2_280_/_0.5)]"
+                        : isCurrentMonth 
+                          ? "text-white" 
+                          : "text-[oklch(0.4_0_0)]"
                   )}
                 >
                   {format(date, 'd')}
@@ -158,11 +176,16 @@ export default function CalendarPage() {
 
                 {/* Task Indicators */}
                 {taskInfo.hasTasks && (
-                  <div className="flex flex-col items-center gap-0.5 w-full px-1">
+                  <div className="flex flex-col items-center gap-1 w-full px-1">
                     {/* Progress bar */}
-                    <div className="w-full h-1 bg-slate-700/50 rounded-full overflow-hidden">
+                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full transition-all"
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          taskInfo.completed === taskInfo.total 
+                            ? "bg-gradient-to-r from-emerald-500 to-teal-500" 
+                            : "bg-gradient-to-r from-[oklch(0.72_0.2_280)] to-[oklch(0.7_0.22_320)]"
+                        )}
                         style={{ width: `${(taskInfo.completed / taskInfo.total) * 100}%` }}
                       />
                     </div>
@@ -172,16 +195,11 @@ export default function CalendarPage() {
                       "text-[10px] font-medium",
                       taskInfo.completed === taskInfo.total 
                         ? "text-emerald-400" 
-                        : "text-slate-400"
+                        : "text-[oklch(0.5_0_0)]"
                     )}>
                       {taskInfo.completed}/{taskInfo.total}
                     </span>
                   </div>
-                )}
-
-                {/* Today outline indicator */}
-                {isCurrentDay && (
-                  <div className="absolute inset-0 border-2 border-violet-500/30 rounded-lg pointer-events-none" />
                 )}
               </button>
             )
@@ -190,24 +208,29 @@ export default function CalendarPage() {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center justify-center gap-6 text-xs text-slate-500">
+      <div className="mt-6 flex items-center justify-center gap-8 text-xs text-[oklch(0.5_0_0)]">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded border-2 border-violet-500/50 bg-violet-500/10" />
+          <div className="w-4 h-4 rounded-lg bg-gradient-to-br from-[oklch(0.72_0.2_280)] to-[oklch(0.7_0.22_320)]" />
           <span>Today</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full" />
+          <div className="w-4 h-1 bg-gradient-to-r from-[oklch(0.72_0.2_280)] to-[oklch(0.7_0.22_320)] rounded-full" />
           <span>Progress</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-slate-900/30 opacity-40" />
+          <div className="w-4 h-4 rounded bg-black/20 opacity-40" />
           <span>Past days</span>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="mt-6 bg-slate-800/30 rounded-xl border border-slate-700/50 p-4">
-        <h3 className="text-sm font-medium text-slate-400 mb-3">This Month</h3>
+      <div className="mt-6 bg-gradient-to-r from-[oklch(0.18_0.018_265)]/60 to-[oklch(0.16_0.015_265)]/60 backdrop-blur-sm rounded-2xl border border-white/5 p-5 shadow-lg">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-[oklch(0.72_0.2_280_/_0.15)] flex items-center justify-center">
+            <CalendarIcon className="w-4 h-4 text-[oklch(0.72_0.2_280)]" />
+          </div>
+          <h3 className="text-sm font-medium text-[oklch(0.7_0_0)]">This Month</h3>
+        </div>
         <div className="grid grid-cols-3 gap-4 text-center">
           {(() => {
             const monthStart = startOfMonth(currentMonth)
@@ -228,17 +251,17 @@ export default function CalendarPage() {
 
             return (
               <>
-                <div>
+                <div className="bg-white/5 rounded-xl p-3">
                   <div className="text-2xl font-bold text-white">{totalTasks}</div>
-                  <div className="text-xs text-slate-500">Total Tasks</div>
+                  <div className="text-[11px] text-[oklch(0.5_0_0)]">Total Tasks</div>
                 </div>
-                <div>
+                <div className="bg-white/5 rounded-xl p-3">
                   <div className="text-2xl font-bold text-emerald-400">{completedTasks}</div>
-                  <div className="text-xs text-slate-500">Completed</div>
+                  <div className="text-[11px] text-[oklch(0.5_0_0)]">Completed</div>
                 </div>
-                <div>
-                  <div className="text-2xl font-bold text-violet-400">{futureDaysWithTasks}</div>
-                  <div className="text-xs text-slate-500">Days Planned</div>
+                <div className="bg-white/5 rounded-xl p-3">
+                  <div className="text-2xl font-bold text-[oklch(0.72_0.2_280)]">{futureDaysWithTasks}</div>
+                  <div className="text-[11px] text-[oklch(0.5_0_0)]">Days Planned</div>
                 </div>
               </>
             )

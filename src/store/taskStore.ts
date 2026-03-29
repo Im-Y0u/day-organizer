@@ -25,28 +25,28 @@ export interface Task {
 // Urgency colors mapping
 export const URGENCY_COLORS: Record<UrgencyLevel, { bg: string; border: string; text: string; badge: string }> = {
   low: {
-    bg: 'bg-emerald-600/40',
+    bg: 'bg-emerald-500/10',
     border: 'border-l-emerald-400',
     text: 'text-emerald-100',
-    badge: 'bg-emerald-500/30 text-emerald-200'
+    badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
   },
   medium: {
-    bg: 'bg-sky-600/40',
+    bg: 'bg-sky-500/10',
     border: 'border-l-sky-400',
     text: 'text-sky-100',
-    badge: 'bg-sky-500/30 text-sky-200'
+    badge: 'bg-sky-500/20 text-sky-400 border-sky-500/30'
   },
   high: {
-    bg: 'bg-amber-600/40',
+    bg: 'bg-amber-500/10',
     border: 'border-l-amber-400',
     text: 'text-amber-100',
-    badge: 'bg-amber-500/30 text-amber-200'
+    badge: 'bg-amber-500/20 text-amber-400 border-amber-500/30'
   },
   urgent: {
-    bg: 'bg-rose-600/40',
+    bg: 'bg-rose-500/10',
     border: 'border-l-rose-400',
     text: 'text-rose-100',
-    badge: 'bg-rose-500/30 text-rose-200'
+    badge: 'bg-rose-500/20 text-rose-400 border-rose-500/30'
   }
 }
 
